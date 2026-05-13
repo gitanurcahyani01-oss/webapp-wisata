@@ -1,14 +1,20 @@
-function doGet(e) {
+const SPREADSHEET_ID = "1p4_mQYpu0CvJVjpBvytVD-q09KGkkvJhf1EW8PF6ZO0";
 
-  var sheet = SpreadsheetApp
-    .openById("1p4_mQYpu0CvJVjpBvytVD-q09KGkkvJhf1EW8PF6ZO0")
+const FOLDER_ID = "1NvdZpGUbvstfB39WZZWxgrecpKwbdoUu";
+
+
+
+function doGet() {
+
+  const sheet = SpreadsheetApp
+    .openById(SPREADSHEET_ID)
     .getSheetByName("Sheet1");
 
-  var data = sheet.getDataRange().getValues();
+  const data = sheet.getDataRange().getValues();
 
-  var result = [];
+  let result = [];
 
-  for (var i = 1; i < data.length; i++) {
+  for(let i = 1; i < data.length; i++){
 
     result.push({
       id: data[i][0],
@@ -31,20 +37,53 @@ function doGet(e) {
 
 function doPost(e) {
 
-  var sheet = SpreadsheetApp
-    .openById("1p4_mQYpu0CvJVjpBvytVD-q09KGkkvJhf1EW8PF6ZO0")
+  const sheet = SpreadsheetApp
+    .openById(SPREADSHEET_ID)
     .getSheetByName("Sheet1");
 
-  var data = JSON.parse(e.postData.contents);
+  const folder = DriveApp.getFolderById(FOLDER_ID);
 
+  const data = JSON.parse(e.postData.contents);
+
+  // AMBIL BASE64
+  const base64Data = data.gambar.split(",")[1];
+
+  // AMBIL CONTENT TYPE
+  const contentType =
+    data.gambar.match(/^data:(image\/\w+);base64,/)[1];
+
+  // EXTENSION
+  const extension = contentType.split("/")[1];
+
+  // BUAT FILE
+  const blob = Utilities.newBlob(
+    Utilities.base64Decode(base64Data),
+    contentType,
+    "wisata_" + new Date().getTime() + "." + extension
+  );
+
+  // SIMPAN KE GOOGLE DRIVE
+  const file = folder.createFile(blob);
+
+  // SHARE PUBLIC
+  file.setSharing(
+    DriveApp.Access.ANYONE_WITH_LINK,
+    DriveApp.Permission.VIEW
+  );
+
+  // LINK GAMBAR
+  const imageUrl =
+    "https://drive.google.com/uc?export=view&id=" + file.getId();
+
+  // SIMPAN KE SHEETS
   sheet.appendRow([
-    data.id,
+    new Date().getTime(),
     data.nama_wisata,
     data.kategori,
     data.lokasi_kota,
     data.harga_tiket,
     data.deskripsi,
-    data.gambar
+    imageUrl
   ]);
 
   return ContentService
