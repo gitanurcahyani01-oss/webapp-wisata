@@ -3,9 +3,10 @@ const SPREADSHEET_ID = "1p4_mQYpu0CvJVjpBvytVD-q09KGkkvJhf1EW8PF6ZO0";
 const FOLDER_ID = "1NvdZpGUbvstfB39WZZWxgrecpKwbdoUu";
 
 
-// =======================
+
+// =========================
 // GET DATA
-// =======================
+// =========================
 
 function doGet() {
 
@@ -13,20 +14,20 @@ function doGet() {
     .openById(SPREADSHEET_ID)
     .getSheetByName("Sheet1");
 
-  const data = sheet.getDataRange().getValues();
+  const values = sheet.getDataRange().getValues();
 
   let result = [];
 
-  for(let i = 1; i < data.length; i++){
+  for (let i = 1; i < values.length; i++) {
 
     result.push({
-      id: data[i][0],
-      nama_wisata: data[i][1],
-      kategori: data[i][2],
-      lokasi_kota: data[i][3],
-      harga_tiket: data[i][4],
-      deskripsi: data[i][5],
-      gambar: data[i][6]
+      id: values[i][0],
+      nama_wisata: values[i][1],
+      kategori: values[i][2],
+      lokasi_kota: values[i][3],
+      harga_tiket: values[i][4],
+      deskripsi: values[i][5],
+      gambar: values[i][6]
     });
 
   }
@@ -38,9 +39,9 @@ function doGet() {
 
 
 
-// =======================
+// =========================
 // POST DATA
-// =======================
+// =========================
 
 function doPost(e) {
 
@@ -54,39 +55,80 @@ function doPost(e) {
 
     const data = JSON.parse(e.postData.contents);
 
-    // VALIDASI GAMBAR
-    if (!data.gambar || data.gambar === "") {
+
+
+    // VALIDASI DATA
+    if (!data.gambar) {
 
       return ContentService
-        .createTextOutput(
-          JSON.stringify({
-            status: "error",
-            message: "Gambar kosong"
-          })
-        )
+        .createTextOutput(JSON.stringify({
+          status: "error",
+          message: "Gambar tidak ada"
+        }))
         .setMimeType(ContentService.MimeType.JSON);
 
     }
 
-    // AMBIL BASE64
-    const base64Data = data.gambar.split(",")[1];
 
-    // AMBIL CONTENT TYPE
-    const contentType =
-      data.gambar.match(/^data:(image\/\w+);base64,/)[1];
 
-    // EXTENSION
-    const extension = contentType.split("/")[1];
+    // =========================
+    // PROSES BASE64
+    // =========================
 
-    // BUAT BLOB
+    const matches = data.gambar.match(/^data:(.+);base64,(.+)$/);
+
+    if (!matches) {
+
+      return ContentService
+        .createTextOutput(JSON.stringify({
+          status: "error",
+          message: "Format gambar salah"
+        }))
+        .setMimeType(ContentService.MimeType.JSON);
+
+    }
+
+    const contentType = matches[1];
+    const base64Data = matches[2];
+
+
+
+    // EXTENSION FILE
+    let extension = "png";
+
+    if (contentType.includes("jpeg")) {
+      extension = "jpg";
+    }
+
+    if (contentType.includes("png")) {
+      extension = "png";
+    }
+
+    if (contentType.includes("webp")) {
+      extension = "webp";
+    }
+
+
+
+    // =========================
+    // BUAT FILE
+    // =========================
+
     const blob = Utilities.newBlob(
       Utilities.base64Decode(base64Data),
       contentType,
       "wisata_" + new Date().getTime() + "." + extension
     );
 
-    // SIMPAN FILE KE DRIVE
+
+
+    // =========================
+    // UPLOAD KE DRIVE
+    // =========================
+
     const file = folder.createFile(blob);
+
+
 
     // SHARE PUBLIC
     file.setSharing(
@@ -94,11 +136,18 @@ function doPost(e) {
       DriveApp.Permission.VIEW
     );
 
-    // LINK GAMBAR
+
+
+    // URL GAMBAR
     const imageUrl =
       "https://drive.google.com/uc?export=view&id=" + file.getId();
 
+
+
+    // =========================
     // SIMPAN KE SHEETS
+    // =========================
+
     sheet.appendRow([
       data.id,
       data.nama_wisata,
@@ -109,23 +158,22 @@ function doPost(e) {
       imageUrl
     ]);
 
+
+
     return ContentService
-      .createTextOutput(
-        JSON.stringify({
-          status: "success"
-        })
-      )
+      .createTextOutput(JSON.stringify({
+        status: "success",
+        imageUrl: imageUrl
+      }))
       .setMimeType(ContentService.MimeType.JSON);
 
-  } catch(error) {
+  } catch (err) {
 
     return ContentService
-      .createTextOutput(
-        JSON.stringify({
-          status: "error",
-          message: error.toString()
-        })
-      )
+      .createTextOutput(JSON.stringify({
+        status: "error",
+        message: err.toString()
+      }))
       .setMimeType(ContentService.MimeType.JSON);
 
   }
