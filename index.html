@@ -230,14 +230,22 @@ function simpanData(){
   .then(() => {
     alert("Data berhasil disimpan");
 
-    document.getElementById("nama").value = "";
-    document.getElementById("kategori").value = "";
-    document.getElementById("lokasi").value = "";
-    document.getElementById("harga").value = "";
-    document.getElementById("deskripsi").value = "";
-    document.getElementById("gambarFile").value = "";
-    document.getElementById("preview").style.display = "none";
+    const data = {
 
+      id: document.getElementById("id").value,
+
+      nama_wisata: document.getElementById("nama").value,
+
+      kategori: document.getElementById("kategori").value,
+
+      lokasi_kota: document.getElementById("lokasi").value,
+
+      harga_tiket: document.getElementById("harga").value,
+
+      deskripsi: document.getElementById("deskripsi").value,
+
+      gambar: gambarBase64
+    };
     loadData();
   });
 }
