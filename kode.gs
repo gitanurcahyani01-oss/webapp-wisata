@@ -3,6 +3,9 @@ const SPREADSHEET_ID = "1p4_mQYpu0CvJVjpBvytVD-q09KGkkvJhf1EW8PF6ZO0";
 const FOLDER_ID = "1NvdZpGUbvstfB39WZZWxgrecpKwbdoUu";
 
 
+// =======================
+// GET DATA
+// =======================
 
 function doGet() {
 
@@ -35,60 +38,96 @@ function doGet() {
 
 
 
+// =======================
+// POST DATA
+// =======================
+
 function doPost(e) {
 
-  const sheet = SpreadsheetApp
-    .openById(SPREADSHEET_ID)
-    .getSheetByName("Sheet1");
+  try {
 
-  const folder = DriveApp.getFolderById(FOLDER_ID);
+    const sheet = SpreadsheetApp
+      .openById(SPREADSHEET_ID)
+      .getSheetByName("Sheet1");
 
-  const data = JSON.parse(e.postData.contents);
+    const folder = DriveApp.getFolderById(FOLDER_ID);
 
-  // AMBIL BASE64
-  const base64Data = data.gambar.split(",")[1];
+    const data = JSON.parse(e.postData.contents);
 
-  // AMBIL CONTENT TYPE
-  const contentType =
-    data.gambar.match(/^data:(image\/\w+);base64,/)[1];
+    // VALIDASI GAMBAR
+    if (!data.gambar || data.gambar === "") {
 
-  // EXTENSION
-  const extension = contentType.split("/")[1];
+      return ContentService
+        .createTextOutput(
+          JSON.stringify({
+            status: "error",
+            message: "Gambar kosong"
+          })
+        )
+        .setMimeType(ContentService.MimeType.JSON);
 
-  // BUAT FILE
-  const blob = Utilities.newBlob(
-    Utilities.base64Decode(base64Data),
-    contentType,
-    "wisata_" + new Date().getTime() + "." + extension
-  );
+    }
 
-  // SIMPAN KE GOOGLE DRIVE
-  const file = folder.createFile(blob);
+    // AMBIL BASE64
+    const base64Data = data.gambar.split(",")[1];
 
-  // SHARE PUBLIC
-  file.setSharing(
-    DriveApp.Access.ANYONE_WITH_LINK,
-    DriveApp.Permission.VIEW
-  );
+    // AMBIL CONTENT TYPE
+    const contentType =
+      data.gambar.match(/^data:(image\/\w+);base64,/)[1];
 
-  // LINK GAMBAR
-  const imageUrl =
-    "https://drive.google.com/uc?export=view&id=" + file.getId();
+    // EXTENSION
+    const extension = contentType.split("/")[1];
 
-  // SIMPAN KE SHEETS
-  sheet.appendRow([
-    new Date().getTime(),
-    data.nama_wisata,
-    data.kategori,
-    data.lokasi_kota,
-    data.harga_tiket,
-    data.deskripsi,
-    imageUrl
-  ]);
+    // BUAT BLOB
+    const blob = Utilities.newBlob(
+      Utilities.base64Decode(base64Data),
+      contentType,
+      "wisata_" + new Date().getTime() + "." + extension
+    );
 
-  return ContentService
-    .createTextOutput(JSON.stringify({
-      status: "success"
-    }))
-    .setMimeType(ContentService.MimeType.JSON);
+    // SIMPAN FILE KE DRIVE
+    const file = folder.createFile(blob);
+
+    // SHARE PUBLIC
+    file.setSharing(
+      DriveApp.Access.ANYONE_WITH_LINK,
+      DriveApp.Permission.VIEW
+    );
+
+    // LINK GAMBAR
+    const imageUrl =
+      "https://drive.google.com/uc?export=view&id=" + file.getId();
+
+    // SIMPAN KE SHEETS
+    sheet.appendRow([
+      data.id,
+      data.nama_wisata,
+      data.kategori,
+      data.lokasi_kota,
+      data.harga_tiket,
+      data.deskripsi,
+      imageUrl
+    ]);
+
+    return ContentService
+      .createTextOutput(
+        JSON.stringify({
+          status: "success"
+        })
+      )
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch(error) {
+
+    return ContentService
+      .createTextOutput(
+        JSON.stringify({
+          status: "error",
+          message: error.toString()
+        })
+      )
+      .setMimeType(ContentService.MimeType.JSON);
+
+  }
+
 }
