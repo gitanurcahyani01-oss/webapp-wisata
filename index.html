@@ -128,10 +128,12 @@
 
 <div class="container">
 
- 
+  <!-- FORM -->
   <div class="box">
+
     <h2>Form Wisata</h2>
-     <input type="text" id="id" placeholder="ID Wisata">
+
+    <input type="text" id="id" placeholder="ID Wisata">
 
     <input type="text" id="nama" placeholder="Nama Wisata">
 
@@ -144,113 +146,245 @@
     </select>
 
     <input type="text" id="lokasi" placeholder="Lokasi">
+
     <input type="number" id="harga" placeholder="Harga Tiket">
+
     <textarea id="deskripsi" placeholder="Deskripsi"></textarea>
 
     <input type="file" id="gambarFile" accept="image/*">
+
     <img id="preview">
 
-    <button onclick="simpanData()">Simpan Data</button>
+    <button onclick="simpanData()">
+      Simpan Data
+    </button>
+
   </div>
 
-  <!-- BOX 2 -->
+  <!-- DATA -->
   <div class="box">
+
     <h2>Data Wisata</h2>
+
     <div class="data-box" id="dataWisata"></div>
+
   </div>
 
 </div>
 
 <script>
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbww_qyVxwBi_cZ_WGX4_bd7xnjzq-vkckI7ZIIUHY9xgWLG-vOmq-kW5dwdnQFiBin2UA/exec";
+
+const WEB_APP_URL =
+"https://script.google.com/macros/s/AKfycbww_qyVxwBi_cZ_WGX4_bd7xnjzq-vkckI7ZIIUHY9xgWLG-vOmq-kW5dwdnQFiBin2UA/exec";
 
 let gambarBase64 = "";
 
-// preview gambar
-document.getElementById("gambarFile").addEventListener("change", function(e){
+
+
+// ============================
+// PREVIEW GAMBAR
+// ============================
+
+document
+.getElementById("gambarFile")
+.addEventListener("change", function(e){
+
   const file = e.target.files[0];
+
+  if(!file) return;
+
   const reader = new FileReader();
 
   reader.onload = function(event){
+
     gambarBase64 = event.target.result;
-    document.getElementById("preview").src = gambarBase64;
-    document.getElementById("preview").style.display = "block";
+
+    document.getElementById("preview").src =
+      gambarBase64;
+
+    document.getElementById("preview").style.display =
+      "block";
   };
 
-  if(file){
-    reader.readAsDataURL(file);
-  }
+  reader.readAsDataURL(file);
+
 });
 
-// load data
+
+
+// ============================
+// LOAD DATA
+// ============================
+
 function loadData(){
+
   fetch(WEB_APP_URL)
+
   .then(res => res.json())
+
   .then(data => {
+
     let output = "";
 
     data.reverse().forEach(item => {
+
       output += `
-        <div class="card">
-          <img src="${item.gambar}" alt="gambar wisata">
-          <div class="card-content">
-            <h3>${item.nama_wisata}</h3>
-            <p class="kategori">${item.kategori}</p>
-            <p>${item.deskripsi}</p>
-            <p>${item.lokasi_kota}</p>
-            <p class="harga">Rp ${item.harga_tiket}</p>
-          </div>
+
+      <div class="card">
+
+        <img src="${item.gambar}" alt="gambar wisata">
+
+        <div class="card-content">
+
+          <h3>${item.nama_wisata}</h3>
+
+          <p class="kategori">
+            ${item.kategori}
+          </p>
+
+          <p>${item.deskripsi}</p>
+
+          <p>${item.lokasi_kota}</p>
+
+          <p class="harga">
+            Rp ${item.harga_tiket}
+          </p>
+
         </div>
+
+      </div>
+
       `;
+
     });
 
-    document.getElementById("dataWisata").innerHTML = output;
+    document.getElementById("dataWisata").innerHTML =
+      output;
+
+  })
+
+  .catch(err => {
+
+    console.log(err);
+
   });
+
 }
 
-// simpan data
+
+
+// ============================
+// SIMPAN DATA
+// ============================
+
 function simpanData(){
+
+  // VALIDASI
+  if(gambarBase64 == ""){
+
+    alert("Pilih gambar terlebih dahulu");
+
+    return;
+
+  }
+
   const data = {
-    nama_wisata: document.getElementById("nama").value,
-    kategori: document.getElementById("kategori").value,
-    lokasi_kota: document.getElementById("lokasi").value,
-    harga_tiket: document.getElementById("harga").value,
-    deskripsi: document.getElementById("deskripsi").value,
-    gambar: gambarBase64
+
+    id:
+      document.getElementById("id").value,
+
+    nama_wisata:
+      document.getElementById("nama").value,
+
+    kategori:
+      document.getElementById("kategori").value,
+
+    lokasi_kota:
+      document.getElementById("lokasi").value,
+
+    harga_tiket:
+      document.getElementById("harga").value,
+
+    deskripsi:
+      document.getElementById("deskripsi").value,
+
+    gambar:
+      gambarBase64
+
   };
 
-  fetch(WEB_APP_URL,{
+
+
+  fetch(WEB_APP_URL, {
+
     method:"POST",
+
     headers:{
       "Content-Type":"text/plain;charset=utf-8"
     },
+
     body: JSON.stringify(data)
+
   })
-  .then(res => res.text())
-  .then(() => {
-    alert("Data berhasil disimpan");
 
-    const data = {
+  .then(res => res.json())
 
-      id: document.getElementById("id").value,
+  .then(result => {
 
-      nama_wisata: document.getElementById("nama").value,
+    console.log(result);
 
-      kategori: document.getElementById("kategori").value,
+    if(result.status == "success"){
 
-      lokasi_kota: document.getElementById("lokasi").value,
+      alert("Data berhasil disimpan");
 
-      harga_tiket: document.getElementById("harga").value,
 
-      deskripsi: document.getElementById("deskripsi").value,
 
-      gambar: gambarBase64
-    };
-    loadData();
+      // RESET FORM
+      document.getElementById("id").value = "";
+
+      document.getElementById("nama").value = "";
+
+      document.getElementById("kategori").value = "";
+
+      document.getElementById("lokasi").value = "";
+
+      document.getElementById("harga").value = "";
+
+      document.getElementById("deskripsi").value = "";
+
+      document.getElementById("gambarFile").value = "";
+
+      document.getElementById("preview").style.display =
+        "none";
+
+      gambarBase64 = "";
+
+
+
+      loadData();
+
+    } else {
+
+      alert(result.message);
+
+    }
+
+  })
+
+  .catch(err => {
+
+    console.log(err);
+
+    alert("Terjadi error");
+
   });
+
 }
 
+
+
 loadData();
+
 </script>
 
 </body>
