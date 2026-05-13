@@ -179,3 +179,19 @@ function doPost(e) {
   }
 
 }
+
+function testUpload() {
+
+  const folder = DriveApp.getFolderById(
+    "1NvdZpGUbvstfB39WZZWxgrecpKwbdoUu"
+  );
+
+  const blob = Utilities.newBlob(
+    "TEST FILE",
+    "text/plain",
+    "test.txt"
+  );
+
+  folder.createFile(blob);
+
+}
