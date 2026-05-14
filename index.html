@@ -1,390 +1,115 @@
 <!DOCTYPE html>
-<html lang="id">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Web App Data Wisata</title>
-
+  <base target="_top">
   <style>
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-      font-family:Arial, sans-serif;
-    }
-
-    body{
-      background:linear-gradient(to right,#fff,#ffd6e7);
-      padding:30px;
-    }
-
-    h1{
-      text-align:center;
-      margin-bottom:30px;
-      color:#ff4f8b;
-    }
-
-    .container{
-      display:grid;
-      grid-template-columns:380px 1fr;
-      gap:30px;
-      align-items:start;
-    }
-
-    .box{
-      background:white;
-      padding:25px;
-      border-radius:20px;
-      box-shadow:0 5px 15px rgba(0,0,0,0.1);
-    }
-
-    .box h2{
-      color:#ff4f8b;
-      margin-bottom:20px;
-    }
-
-    input, textarea, select{
-      width:100%;
-      padding:12px;
-      margin-top:10px;
-      border-radius:10px;
-      border:1px solid #ddd;
-      outline:none;
-      font-size:15px;
-    }
-
-    textarea{
-      resize:none;
-      min-height:100px;
-    }
-
-    button{
-      width:100%;
-      padding:14px;
-      border:none;
-      background:#ff4f8b;
-      color:white;
-      border-radius:10px;
-      margin-top:20px;
-      cursor:pointer;
-      font-size:16px;
-    }
-
-    button:hover{
-      background:#ff2f74;
-    }
-
-    .data-box{
-      display:grid;
-      grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-      gap:20px;
-    }
-
-    .card{
-      background:#fff;
-      border-radius:15px;
-      overflow:hidden;
-      box-shadow:0 5px 15px rgba(0,0,0,0.1);
-    }
-
-    .card img{
-      width:100%;
-      height:200px;
-      object-fit:cover;
-    }
-
-    .card-content{
-      padding:15px;
-    }
-
-    .kategori{
-      color:#ff4f8b;
-      font-weight:bold;
-      margin:8px 0;
-    }
-
-    .harga{
-      margin-top:10px;
-      font-weight:bold;
-    }
-
-    #preview{
-      width:100%;
-      margin-top:10px;
-      border-radius:10px;
-      display:none;
-    }
-
-    @media(max-width:900px){
-      .container{
-        grid-template-columns:1fr;
-      }
-    }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; padding: 20px; }
+    .container { display: flex; gap: 20px; flex-wrap: wrap; }
+    .box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); flex: 1; min-width: 350px; }
+    h2 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input, select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+    button { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; width: 100%; }
+    button:hover { background: #2980b9; }
+    
+    /* Style Tabel di Box 2 */
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background-color: #f2f2f2; }
+    .img-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
   </style>
 </head>
-
 <body>
 
-<h1>Web App Data Wisata</h1>
-
 <div class="container">
-
-  <!-- FORM -->
   <div class="box">
-
-    <h2>Form Wisata</h2>
-
-    <input type="text" id="id" placeholder="ID Wisata">
-
-    <input type="text" id="nama" placeholder="Nama Wisata">
-
-    <select id="kategori">
-      <option value="">Pilih Kategori</option>
-      <option>Pantai</option>
-      <option>Gunung</option>
-      <option>Air Terjun</option>
-      <option>Taman Wisata</option>
-    </select>
-
-    <input type="text" id="lokasi" placeholder="Lokasi">
-
-    <input type="number" id="harga" placeholder="Harga Tiket">
-
-    <textarea id="deskripsi" placeholder="Deskripsi"></textarea>
-
-    <input type="file" id="gambarFile" accept="image/*">
-
-    <img id="preview">
-
-    <button onclick="simpanData()">
-      Simpan Data
-    </button>
-
+    <h2>Input Wisata Baru</h2>
+    <form id="wisataForm" onsubmit="handleFormSubmit(this); return false;">
+      <div class="form-group"><label>ID</label><input type="text" name="id" required></div>
+      <div class="form-group"><label>Nama Wisata</label><input type="text" name="nama" required></div>
+      <div class="form-group">
+        <label>Kategori</label>
+        <select name="kategori">
+          <option value="Alam">Alam</option>
+          <option value="Budaya">Budaya</option>
+          <option value="Kuliner">Kuliner</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Lokasi</label><input type="text" name="lokasi" required></div>
+      <div class="form-group"><label>Harga Tiket</label><input type="number" name="harga" required></div>
+      <div class="form-group"><label>Gambar</label><input type="file" name="foto" accept="image/*" required></div>
+      <button type="submit" id="submitBtn">Simpan Wisata</button>
+    </form>
+    <div id="msg" style="margin-top:10px; color: green; font-weight: bold;"></div>
   </div>
 
-  <!-- DATA -->
   <div class="box">
-
-    <h2>Data Wisata</h2>
-
-    <div class="data-box" id="dataWisata"></div>
-
+    <h2>Daftar Wisata</h2>
+    <div id="tabelData">Memuat data...</div>
   </div>
-
 </div>
 
 <script>
+  // Panggil data saat pertama kali dibuka
+  window.onload = loadData;
 
-const WEB_APP_URL =
-"https://script.google.com/macros/s/AKfycbw9UgLhf__v5AvhaKLoqbccL1m2anSyAN3EmkpDEPCCoYjRqREz8vNAFHVTadIIrIU9/exec";
-
-let gambarBase64 = "";
-
-
-
-// ============================
-// PREVIEW GAMBAR
-// ============================
-
-document
-.getElementById("gambarFile")
-.addEventListener("change", function(e){
-
-  const file = e.target.files[0];
-
-  if(!file) return;
-
-  const reader = new FileReader();
-
-  reader.onload = function(event){
-
-    gambarBase64 = event.target.result;
-
-    document.getElementById("preview").src =
-      gambarBase64;
-
-    document.getElementById("preview").style.display =
-      "block";
-  };
-
-  reader.readAsDataURL(file);
-
-});
-
-
-
-// ============================
-// LOAD DATA
-// ============================
-
-function loadData(){
-
-  fetch(WEB_APP_URL)
-
-  .then(res => res.json())
-
-  .then(data => {
-
-    let output = "";
-
-    data.reverse().forEach(item => {
-
-      output += `
-
-      <div class="card">
-
-        <img src="${item.gambar}" alt="gambar wisata">
-
-        <div class="card-content">
-
-          <h3>${item.nama_wisata}</h3>
-
-          <p class="kategori">
-            ${item.kategori}
-          </p>
-
-          <p>${item.deskripsi}</p>
-
-          <p>${item.lokasi_kota}</p>
-
-          <p class="harga">
-            Rp ${item.harga_tiket}
-          </p>
-
-        </div>
-
-      </div>
-
-      `;
-
-    });
-
-    document.getElementById("dataWisata").innerHTML =
-      output;
-
-  })
-
-  .catch(err => {
-
-    console.log(err);
-
-  });
-
-}
-
-
-
-// ============================
-// SIMPAN DATA
-// ============================
-
-function simpanData(){
-
-  // VALIDASI
-  if(gambarBase64 == ""){
-
-    alert("Pilih gambar terlebih dahulu");
-
-    return;
-
+  function loadData() {
+    google.script.run.withSuccessHandler(showTable).getDataWisata();
   }
 
-  const data = {
-
-    id:
-      document.getElementById("id").value,
-
-    nama_wisata:
-      document.getElementById("nama").value,
-
-    kategori:
-      document.getElementById("kategori").value,
-
-    lokasi_kota:
-      document.getElementById("lokasi").value,
-
-    harga_tiket:
-      document.getElementById("harga").value,
-
-    deskripsi:
-      document.getElementById("deskripsi").value,
-
-    gambar:
-      gambarBase64
-
-  };
-
-
-
-  fetch(WEB_APP_URL, {
-
-    method:"POST",
-
-    headers:{
-      "Content-Type":"text/plain;charset=utf-8"
-    },
-
-    body: JSON.stringify(data)
-
-  })
-
-  .then(res => res.json())
-
-  .then(result => {
-
-    console.log(result);
-
-    if(result.status == "success"){
-
-      alert("Data berhasil disimpan");
-
-
-
-      // RESET FORM
-      document.getElementById("id").value = "";
-
-      document.getElementById("nama").value = "";
-
-      document.getElementById("kategori").value = "";
-
-      document.getElementById("lokasi").value = "";
-
-      document.getElementById("harga").value = "";
-
-      document.getElementById("deskripsi").value = "";
-
-      document.getElementById("gambarFile").value = "";
-
-      document.getElementById("preview").style.display =
-        "none";
-
-      gambarBase64 = "";
-
-
-
-      loadData();
-
-    } else {
-
-      alert(result.message);
-
+  function showTable(data) {
+    if (data.length <= 1) {
+      document.getElementById('tabelData').innerHTML = "Belum ada data.";
+      return;
     }
+    var html = '<table><tr>';
+    // Header
+    for (var i = 0; i < data[0].length; i++) {
+      html += '<th>' + data[0][i] + '</th>';
+    }
+    html += '</tr>';
+    // Isi Data
+    for (var i = 1; i < data.length; i++) {
+      html += '<tr>';
+      for (var j = 0; j < data[i].length; j++) {
+        if (j == 5) { // Kolom Link Gambar
+          html += '<td><a href="' + data[i][j] + '" target="_blank">Lihat Foto</a></td>';
+        } else {
+          html += '<td>' + data[i][j] + '</td>';
+        }
+      }
+      html += '</tr>';
+    }
+    html += '</table>';
+    document.getElementById('tabelData').innerHTML = html;
+  }
 
-  })
-
-  .catch(err => {
-
-    console.log(err);
-
-    alert("Terjadi error");
-
-  });
-
-}
-
-
-
-loadData();
-
+  function handleFormSubmit(form) {
+    document.getElementById('submitBtn').disabled = true;
+    var file = form.foto.files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var data = e.target.result.split(",");
+      var obj = {
+        id: form.id.value,
+        nama: form.nama.value,
+        kategori: form.kategori.value,
+        lokasi: form.lokasi.value,
+        harga: form.harga.value,
+        fileName: file.name,
+        mimeType: data[0].match(/:([^;]+);/)[1],
+        fileData: data[1]
+      };
+      google.script.run.withSuccessHandler(function(res) {
+        document.getElementById('msg').innerText = res;
+        form.reset();
+        document.getElementById('submitBtn').disabled = false;
+        loadData(); // Refresh tabel setelah simpan
+      }).uploadDataWisata(obj);
+    };
+    reader.readAsDataURL(file);
+  }
 </script>
 
 </body>
